@@ -2,57 +2,60 @@ import React, { Component } from 'react';
 import { Button } from 'react-toolbox/lib/button';
 import { findIndex, set } from 'lodash/fp';
 import { fromJS, List } from 'immutable';
+import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import Post from './Post/Post';
 import PostForm from './PostForm/PostForm';
 import { endpoints } from '../../constants';
 
 class Posts extends Component {
 
+  static propTypes = {
+    fetchPosts: PropTypes.func.isRequired,
+    postsData: ImmutablePropTypes.map.isRequired,
+  };
+
   state = {
-    posts: List(),
+    // posts: List(),
     showForm: false,
     postToEdit: undefined,
   };
 
   componentDidMount() {
-    this.getPosts();
+    const { fetchPosts } = this.props;
+    fetchPosts();
   }
 
-  async getPosts() {
+  componentWillReceiveProps(nextProps) {
+    const { fetchPosts } = this.props;
+    const { postsData } = nextProps;
 
-    const response = await fetch(endpoints.posts);
-    const posts = await response.json();
-    this.setState({ posts: fromJS(posts) });
-
+    if (!postsData.get('postsLoading') && postsData.get('refresh')) {
+      console.log('¡Entró!');
+      fetchPosts();
+    }
   }
+
+  // async getPosts() {
+  //   console.log(endpoints.posts);
+  //   const response = await fetch(endpoints.posts);
+  //   const posts = await response.json();
+  //   this.setState({ posts: fromJS(posts) });
+  //
+  // }
 
   createPost = (post) => {
-    fetch(endpoints.posts, {
-      method: 'POST',
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(post.toJS()),
-    });
-    this.handleCloseForm();
+    const { createPost } = this.props;
+    this.setState({ showForm: false }, () => createPost(post.toJS()));
+
   };
 
-  editPost = (post) => {
-
-    console.log(post);
-    fetch(`${endpoints.posts}/${post.get('id')}`, {
-      method: 'PUT',
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(post.toJS()),
-    });
-    this.handleCloseForm();
+  handleEditPost = (post) => {
+    const { editPost } = this.props;
+    this.setState({ showForm: false }, () => editPost(post.get("id"),post.toJS()));
   };
 
-  editPostForm = (id, post) => {
+  handleEditPostForm = (id, post) => {
     this.setState({
       showForm: true,
       postToEdit: post
@@ -63,15 +66,9 @@ class Posts extends Component {
 
 
   handleDeletePost = (id) => {
-    fetch(`${endpoints.posts}/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-    });
-    this.handleCloseForm();
-  };
+    const { deletePost } = this.props;
+    this.setState({ showForm: false }, () => deletePost(id));
+  }
 
   handleShowForm = () => {
     this.setState({ showForm: true });
@@ -79,22 +76,20 @@ class Posts extends Component {
 
   handleCloseForm = () => {
     this.setState({ showForm: false, postToEdit: undefined });
-    window.location.reload();
   };
 
   render() {
+    const posts = this.props.postsData.get('posts');
 
-    const posts = this.state.posts.map(post => (
+    const postItems = posts.map(post => (
       <Post
         key={post.get('_id')}
         id={post.get('_id')}
         post={post}
-        editPost={this.editPostForm}
+        editPost={this.handleEditPostForm}
         deletePost={this.handleDeletePost}
       />
     )).toJS();
-
-
 
     // const posts = this.state.posts.length > 0 ?
     // (
@@ -108,11 +103,11 @@ class Posts extends Component {
 
     return (
       <div>
-        {posts}
+        {postItems}
         <PostForm
           active={this.state.showForm}
           createPost={this.createPost}
-          editPost={this.editPost}
+          editPost={this.handleEditPost}
           closeForm={this.handleCloseForm}
           post={this.state.postToEdit}
         />

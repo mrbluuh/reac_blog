@@ -22,15 +22,14 @@ class Post extends Component {
     buttonIcon: "visibility"
   }
   handleToggleComments = () => {
-      this.setState({
-        hideComments: !this.state.hideComments,
-        buttonIcon: this.state.hideComments ?
-          "visibility" : "visibility_off",
-      });
+    this.setState({
+      hideComments: !this.state.hideComments,
+      buttonIcon: this.state.hideComments ?
+      "visibility" : "visibility_off",
+    });
   }
   render(){
     const { post, editPost, deletePost, id } = this.props;
-      
     return(
       <Card style={{width: '600px'}}>
         <CardTitle
@@ -60,9 +59,9 @@ class Post extends Component {
             <CardTitle
               title="Comentarios"
             />
-              <CardText >
-                  <Comments />
-              </CardText>
+            <CardText >
+              <Comments />
+            </CardText>
           </Card>
         </div>
       </Card>

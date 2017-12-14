@@ -10,19 +10,18 @@ import Dialog from 'react-toolbox/lib/dialog';
 class PostForm extends Component {
 
   static propTypes = {
-     post: ImmutablePropTypes.map,
-     createPost: PropTypes.func.isRequired,
-     editPost: PropTypes.func.isRequired,
-     active: PropTypes.bool.isRequired,
-     closeForm: PropTypes.func.isRequired,
-   };
+    post: ImmutablePropTypes.map,
+    createPost: PropTypes.func.isRequired,
+    active: PropTypes.bool.isRequired,
+    closeForm: PropTypes.func.isRequired,
+  };
 
-   static postState = () => fromJS({
-     title: '',
-     body: '',
-   });
+  static postState = () => fromJS({
+    title: '',
+    body: '',
+  });
 
-   state = {
+  state = {
     postState: PostForm.postState(),
   };
 
@@ -51,12 +50,18 @@ class PostForm extends Component {
     const post = this.state.postState.set('date', Date());
     //
     this.setState({ postState: PostForm.postState() }, () => createPost(post));
+    // createPost(post);
   };
 
   handleEditPost = () => {
     const { editPost } = this.props;
-    const post = this.state.postState.set('date', Date());
-    this.setState({ postState: PostForm.postState() }, () => editPost(post),
+    const postState = this.state.postState;
+    console.log(postState);
+    this.setState(
+      {
+        postState: PostForm.postState(),
+      },
+      () => editPost(postState),
     );
   };
 
@@ -79,14 +84,14 @@ class PostForm extends Component {
         onClick: isNil(post) ? this.handleCreatePost : this.handleEditPost,
       }
     ];
-      return (
-        <div>
-          <Dialog
-            actions={actions}
-            active={active}
-            onEscKeyDown={this.handleClose}
-            onOverlayClick={this.handleClose}
-            title='My awesome dialog'
+    return (
+      <div>
+        <Dialog
+          actions={actions}
+          active={active}
+          onEscKeyDown={this.handleClose}
+          onOverlayClick={this.handleClose}
+          title='My awesome dialog'
           >
             <Input
               label="Title"
@@ -102,7 +107,7 @@ class PostForm extends Component {
 
         </div>
       );
+    }
   }
-}
 
-export default PostForm;
+  export default PostForm;
